@@ -16,9 +16,38 @@ if(!isset($_SESSION["user"])){
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Dashboard</h1>
-        <a href="logout.php" class="btn btn-warning">Logout</a>
-    </div>
+
+    <h1>Texas Lottery Tickets</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a href="#.php" class="navbar-brand">TLPS</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a href="index.php" class="nav-link">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a href="#.php" class="nav-link">Browse </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#.php" class="nav-link">Ticket Search </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#.php" class="nav-link">My Profile </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#.php" class="nav-link">History </a>
+                </li>
+                <li class="nav-item">
+                    <a href="logout.php" class="nav-link">Logout</a>
+                </li>
+                
+
+                </li>
+            </ul>
+        </div>
+    
+    </nav>
+    
+
 </body>
 </html>
