@@ -6,7 +6,7 @@ if(isset($_SESSION["user"])){
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
     <head>
         <meta charset = "UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +50,7 @@ if(isset($_SESSION["user"])){
                 $sql = "SELECT * FROM users WHERE email = '$email'";
                 $result = mysqli_query($conn_bool, $sql);
                 $alike_row_count = mysqli_num_rows($result);
-
+                
                 if($alike_row_count > 0){
                     array_push($errors, "Account already exists with this email.");
                 }
@@ -109,7 +109,7 @@ if(isset($_SESSION["user"])){
             <div>
             <p>
                 Already Registered?
-                <a href="registration.php">Login Here</a>
+                <a href="login.php">Login Here</a>
             </p>
         </div>
         </div>
