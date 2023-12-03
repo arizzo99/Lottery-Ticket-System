@@ -1,5 +1,0 @@
-ticket_information: columns = ["ticketID", "isPurchased", "userID", "Price", "Winning Amount"]
-                    if userID == NaN then the ticket is yet to be purchased
-                    note: need to add a winning numbers column
-user_information: columns = ['userID', 'username', 'password']
-                    will need to add more columns for email and all associated registration information
