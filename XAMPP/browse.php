@@ -37,6 +37,9 @@ if(!isset($_SESSION["user"])){
                     <a href="history.php" class="nav-link">History </a>
                 </li>
                 <li class="nav-item">
+                    <a href="checkout.php" class="nav-link">Checkout </a>
+                </li>
+                <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
                 </li>
@@ -78,47 +81,125 @@ if(!isset($_SESSION["user"])){
                 }
             }
             else{
-                # once we reach here all ticket information is valid and can be pushed to the database
-                $sql = "INSERT INTO shopping_cart (ticket_id, id) VALUES (?, ?)";
-                $stmt = mysqli_stmt_init($conn_bool);
-                $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
-
-                
-
-                if($prepare_stmt){
-                    foreach($all_tickets as $ticket){
-                        mysqli_stmt_bind_param($stmt, "ss", $ticket, $user_id);
-                        mysqli_stmt_execute($stmt);
+                # once we reach here all ticket information is valid and can be pushed to the database           
+                foreach($all_tickets as $ticket){
+                    $sql = "SELECT price, winning_amount, winning_numbers FROM tickets WHERE $ticket = ticket_id";
+                    $result = mysqli_query($conn_bool, $sql);
+                    $data = $result->fetch_all(MYSQLI_ASSOC);
+                    foreach($data as $val){
+                        $price = $val['price'];
+                        $winning_amount = $val['winning_amount'];
+                        $winning_numbers = $val['winning_numbers'];
                     }
-
-                    $sql_del = "DELETE FROM tickets WHERE ticket_id = ?";
-                    $stmt_del = mysqli_stmt_init($conn_bool);
-                    $prepare_stmt_del = mysqli_stmt_prepare($stmt_del, $sql_del);
-
-                    if($prepare_stmt_del){
-                        foreach($all_tickets as $ticket){
-                            mysqli_stmt_bind_param($stmt_del, "s", $ticket);
-                            mysqli_stmt_execute($stmt_del);
-                        }
-
-                        echo "<div class='alert alert-info'>Your tickets have been added to your cart!</div>";
-                    }
-                    else{
-                        die("Something went wrong.");
-                    }
-
                     
+                    $sql = "INSERT INTO shopping_cart (ticket_id, id, price, winning_amount, winning_numbers) VALUES (?, ?, ? ,? ,?)";
+                    $stmt = mysqli_stmt_init($conn_bool);
+                    $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
+
+                    mysqli_stmt_bind_param($stmt, "sssss", $ticket, $user_id, $price, $winning_amount, $winning_numbers);
+                    mysqli_stmt_execute($stmt);
+                }
+
+                $sql_del = "DELETE FROM tickets WHERE ticket_id = ?";
+                $stmt_del = mysqli_stmt_init($conn_bool);
+                $prepare_stmt_del = mysqli_stmt_prepare($stmt_del, $sql_del);
+
+                if($prepare_stmt_del){
+                    foreach($all_tickets as $ticket){
+                        mysqli_stmt_bind_param($stmt_del, "s", $ticket);
+                        mysqli_stmt_execute($stmt_del);
+                    }
+
+                    echo "<div class='alert alert-info'>Your tickets have been added to your cart!</div>";
                 }
                 else{
                     die("Something went wrong.");
                 }
-                
             }
         }
         else{
             echo "<div class='alert alert-danger'>There are no tickets in your selection!</div>";
         }
         
+    }
+    elseif(isset($_POST['random'])){
+        $rand_tickets = array();
+        $num_selected = 0;
+
+        require_once 'database.php';
+        $sql = "SELECT ticket_id, price, winning_amount FROM tickets WHERE id IS NULL";
+        $result = mysqli_query($conn_bool, $sql);
+        $data = $result->fetch_all(MYSQLI_ASSOC);
+
+        if(isset($_SESSION['selected_tickets']) and sizeof($_SESSION['selected_tickets'])){
+            # user has some tickets selected. determine how many they have selected to see how many we need to randomly select.
+            $num_selected = sizeof($_SESSION['selected_tickets']);
+        }
+        else{
+            # user has no tickets selected, select 5 random tickets
+        }
+
+        $rand_selection_count = 5 - $num_selected;
+
+        
+        $all_tickets = array();
+        foreach($data as $ticket){
+            array_push($all_tickets, $ticket['ticket_id']);
+        }
+
+        while(sizeof($rand_tickets) !== $rand_selection_count){
+            $k = array_rand($all_tickets);
+            $random_tick = $all_tickets[$k];
+
+            if(!in_array($random_tick, $rand_tickets) and !in_array($random_tick, $_SESSION['selected_tickets'])){
+                array_push($rand_tickets, $random_tick);
+            }
+        }
+
+        foreach($rand_tickets as $tick){
+            array_push($_SESSION['selected_tickets'], $tick);
+        }
+
+
+    }
+    elseif(isset($_POST['delete'])){
+        if(isset($_SESSION['selected_tickets']) and sizeof($_SESSION['selected_tickets']) > 0){
+            $errors = array();
+            # store info of the selected tickets
+            $all_tickets = array();
+            # remove all rows from selection table
+            foreach($_SESSION['selected_tickets'] as $value){
+                array_push($all_tickets, $value);
+                $key = array_search($value, $_SESSION['selected_tickets']);
+                unset($_SESSION['selected_tickets'][$key]);
+            }
+            
+            require_once 'database.php';
+            $sql_del = "DELETE FROM tickets WHERE ticket_id = ?";
+            $stmt_del = mysqli_stmt_init($conn_bool);
+            $prepare_stmt_del = mysqli_stmt_prepare($stmt_del, $sql_del);
+
+            if($prepare_stmt_del){
+                foreach($all_tickets as $ticket){
+                    mysqli_stmt_bind_param($stmt_del, "s", $ticket);
+                    mysqli_stmt_execute($stmt_del);
+                }
+                echo "<div class='alert alert-info'>Ticket(s) have been deleted</div>";
+            }
+            else{
+                die("Something went wrong.");
+            }
+        }
+        else{
+            echo "<div class='alert alert-danger'>There are no tickets in your selection!</div>";
+        }
+    }
+    elseif(isset($_POST['add'])){
+        $_SESSION['is_adding'] = "yes";
+    }
+    elseif(isset($_POST['add_selections'])){
+        echo "<div class='alert alert-info'>Ticket Added</div>";
+        unset($_SESSION['is_adding']);
     }
     
     foreach($_POST as $key => $value){
@@ -154,7 +235,7 @@ if(!isset($_SESSION["user"])){
         
         <?php
         require_once 'database.php';
-        $sql = "SELECT ticket_id, price, winning_amount FROM tickets";
+        $sql = "SELECT ticket_id, price, winning_amount FROM tickets WHERE id IS NULL";
         $result = mysqli_query($conn_bool, $sql);
         $data = $result->fetch_all(MYSQLI_ASSOC);
         ?>
@@ -190,6 +271,10 @@ if(!isset($_SESSION["user"])){
         </table>
 
         <input type="submit" name="submit" value="submit selections">
+        <input type="submit" name="random" value="select random">
+        <?php if(isset($_SESSION['admin'])): ?>
+            <input type="submit" name="delete" value="delete selected tickets">
+        <?php endif ?>
         <h6>Please browse from the tickets below, you are only allowed to submit 5 selections at a time.</h4>
         <!-- ticket browsing table -->
         <table class='table table-striped table-dark table-hover'>
@@ -223,6 +308,38 @@ if(!isset($_SESSION["user"])){
                 <?php endforeach ?>
             </tbody>
         </table>
+        <?php if(isset($_SESSION['admin'])):?>
+            <input type="submit" name="add" value="add ticket">
+        <?php endif ?>
+        <?php if(isset($_SESSION['is_adding'])): ?>
+            <div class="container">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="price" placeholder="Enter Price Here">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="price" placeholder="Enter Prize Money Here">
+                </div>
+                <div class="form-group">
+                    <input type="number" min="1" max="50" class="form-control" name="num1" placeholder="Winning Number 1">
+                </div>
+                <div class="form-group">
+                    <input type="number" min="1" max="50" class="form-control" name="num2" placeholder="Winning Number 2">
+                </div>
+                <div class="form-group">
+                    <input type="number" min="1" max="50" class="form-control" name="num3" placeholder="Winning Number 3">
+                </div>
+                <div class="form-group">
+                    <input type="number" min="1" max="50" class="form-control" name="num4" placeholder="Winning Number 4">
+                </div>
+                <div class="form-group">
+                    <input type="number" min="1" max="50" class="form-control" name="num5" placeholder="Winning Number 5">
+                </div>
+                <div class="form-btn">
+                    <input type="submit" class="btn btn-primary" value="Add Entered Selections" name="add_selections">
+                </div>
+            </div>
+            
+        <?php endif?>
     </form>
 
 </body>
