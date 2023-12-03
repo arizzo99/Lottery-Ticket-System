@@ -3,6 +3,8 @@ session_start();
 if(!isset($_SESSION["user"])){
     header("Location: login.php");
 }
+$dateTime = strtotime('+0.0001 minutes');
+ $getDateTime = date("F d, Y H:i:s",$dateTime);
 ?>
 
 
@@ -14,6 +16,7 @@ if(!isset($_SESSION["user"])){
     <title>Home</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
@@ -47,8 +50,35 @@ if(!isset($_SESSION["user"])){
         </div>
     </nav>
 
-    <h4>Next ticket drawing in : </h4>
-    
 
+    <h4>Next ticket drawing in:
+
+        <div class="row">
+            <div class="col-md-12 mt-40">  
+		<h2 id="counter" class="text-center"></h2>
+            </div>
+        </div>
+    </div>
+
+<script>
+        var countDownTimer = new Date("<?php echo "$getDateTime"; ?>").getTime();
+        // Update the count down every 1 second
+        var interval = setInterval(function() {
+            var current = new Date().getTime();
+            // Find the difference between current and the count down date
+            var diff = countDownTimer - current;
+           
+            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById("counter").innerHTML =
+            minutes + " m " + seconds + " s ";
+            // Display Expired, if the count down is over
+            if (diff < 0) {
+                clearInterval(interval);
+                document.getElementById("counter").innerHTML = "EXPIRED";
+            }
+        }, 1000);
+</script>
 </body>
-</html>
+</html> 
