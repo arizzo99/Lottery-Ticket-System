@@ -41,6 +41,14 @@ $dateTime = strtotime('+0.0001 minutes');
                     <a href="history.php" class="nav-link">History </a>
                 </li>
                 <li class="nav-item">
+                    <a href="checkout.php" class="nav-link">Checkout </a>
+                </li>
+                <?php if(isset($_SESSION['admin'])):?>
+                <li class="nav-item">
+                    <a href="admin.php" class="nav-link">Status Report</a>
+                </li>
+                <?php endif ?>
+                <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
                 
