@@ -43,6 +43,11 @@ if(!isset($_SESSION["user"])){
                 <li class="nav-item">
                     <a href="checkout.php" class="nav-link">Checkout </a>
                 </li>
+                <?php if(isset($_SESSION['admin'])):?>
+                <li class="nav-item">
+                    <a href="admin.php" class="nav-link">Status Report</a>
+                </li>
+                <?php endif ?>
                 <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
@@ -94,20 +99,21 @@ if(!isset($_SESSION["user"])){
             else{
                 # once we reach here all ticket information is valid and can be pushed to the database           
                 foreach($all_tickets as $ticket){
-                    $sql = "SELECT price, winning_amount, winning_numbers FROM tickets WHERE $ticket = ticket_id";
+                    $sql = "SELECT price, ticket_type, winning_amount, winning_numbers FROM tickets WHERE $ticket = ticket_id";
                     $result = mysqli_query($conn_bool, $sql);
                     $data = $result->fetch_all(MYSQLI_ASSOC);
                     foreach($data as $val){
+                        $ticket_type = $val['ticket_type'];
                         $price = $val['price'];
                         $winning_amount = $val['winning_amount'];
                         $winning_numbers = $val['winning_numbers'];
                     }
                     
-                    $sql = "INSERT INTO shopping_cart (ticket_id, id, price, winning_amount, winning_numbers) VALUES (?, ?, ? ,? ,?)";
+                    $sql = "INSERT INTO shopping_cart (ticket_id, id, price, winning_amount, winning_numbers, ticket_type) VALUES (?, ?, ? ,? ,?, ?)";
                     $stmt = mysqli_stmt_init($conn_bool);
                     $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
 
-                    mysqli_stmt_bind_param($stmt, "sssss", $ticket, $user_id, $price, $winning_amount, $winning_numbers);
+                    mysqli_stmt_bind_param($stmt, "ssssss", $ticket, $user_id, $price, $winning_amount, $winning_numbers, $ticket_type);
                     mysqli_stmt_execute($stmt);
                 }
 
@@ -211,7 +217,21 @@ if(!isset($_SESSION["user"])){
     elseif(isset($_POST['add_selections'])){
         echo "<div class='alert alert-info'>Ticket Added</div>";
         unset($_SESSION['is_adding']);
-        $price = $_POST['price1'];
+
+        $type = $_POST['ticket_type'];
+
+        if($type == "Power Ball"){
+            $price = 2;
+        }
+        elseif($type == "Mega Millions"){
+            $price = 2;
+        }
+        elseif($type == "Lotto Texas"){
+            $price = 1;
+        }
+        else{
+            $price = 1.5;
+        }
         $prize = $_POST['prize1'];
         $num1 = $_POST['num1'];
         $num2 = $_POST['num2'];
@@ -224,14 +244,14 @@ if(!isset($_SESSION["user"])){
         $user_numbers = $user_numbers.'-'.$num3;
         $user_numbers = $user_numbers.'-'.$num4;
         $user_numbers = $user_numbers.'-'.$num5;
-
+        print_r($user_numbers);
         require_once "database.php";
-        $sql = "INSERT INTO tickets (price, winning_amount, winning_numbers) VALUES (?,?,?)";
+        $sql = "INSERT INTO tickets (price, winning_amount, winning_numbers, ticket_type) VALUES (?,?,?, ?)";
         $stmt = mysqli_stmt_init($conn_bool);
         $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
 
         if($prepare_stmt){
-            mysqli_stmt_bind_param($stmt, "iii", $price, $prize, $user_numbers);
+            mysqli_stmt_bind_param($stmt, "iiss", $price, $prize, $user_numbers, $type);
             mysqli_stmt_execute($stmt);
         }
         else{
@@ -273,7 +293,7 @@ if(!isset($_SESSION["user"])){
         
         <?php
         require_once 'database.php';
-        $sql = "SELECT ticket_id, price, winning_amount FROM tickets WHERE id IS NULL";
+        $sql = "SELECT ticket_id, ticket_type, price, winning_amount FROM tickets WHERE id IS NULL";
         $result = mysqli_query($conn_bool, $sql);
         $data = $result->fetch_all(MYSQLI_ASSOC);
         ?>
@@ -319,6 +339,7 @@ if(!isset($_SESSION["user"])){
             <thead class='thead-dark'>
                 <tr>
                     <th scope='col'>Ticket Number</th>
+                    <th scope='col'>Ticket Type</th>
                     <th scope='col'>Price</th>
                     <th scope='col'>Winning Amount</th>
                     <th scope='col'>Select Tickets</th>
@@ -330,6 +351,10 @@ if(!isset($_SESSION["user"])){
                     <div class="form-group">
                         <td><?= htmlspecialchars($row['ticket_id'])?></td>
                         <input type="hidden" name="ticket_id" value=<?= htmlspecialchars($row['ticket_id'])?>>
+                    </div>
+                    <div class="form-group">
+                        <td><?= htmlspecialchars($row['ticket_type'])?></td>
+                        <input type="hidden" name="ticket_id" value=<?= htmlspecialchars($row['ticket_type'])?>>
                     </div>
                     <div class="form-group">
                         <td><?= '$' . htmlspecialchars($row['price'])?></td>
@@ -352,7 +377,13 @@ if(!isset($_SESSION["user"])){
         <?php if(isset($_SESSION['is_adding'])): ?>
             <div class="container">
                 <div class="form-group">
-                    <input type="number" min="1" class="form-control" name="price1" placeholder="Enter Price Here">
+                    <select name="ticket_type" id="ticket_type" class="form-select">
+                        <option selected>Select Ticket Type</option>
+                        <option value="Power Ball">Power Ball</option>
+                        <option value="Mega Millions">Mega Millions</option>
+                        <option value="Lotto Texas">Lotto Texas</option>
+                        <option value="Texas Two Step">Texas Two Step</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <input type="number" min="1" class="form-control" name="prize1" placeholder="Enter Prize Money Here">
