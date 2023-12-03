@@ -38,6 +38,11 @@ if(!isset($_SESSION["user"])){
                     <li class="nav-item">
                         <a href="checkout.php" class="nav-link">Checkout <span class="sr-only">(current)</span></a>
                     </li>
+                    <?php if(isset($_SESSION['admin'])):?>
+                    <li class="nav-item">
+                        <a href="admin.php" class="nav-link">Status Report</a>
+                    </li>
+                    <?php endif ?>
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link">Logout</a>
                     </li>
@@ -50,7 +55,7 @@ if(!isset($_SESSION["user"])){
         if(strpos($key, 'remove_') === 0){
             require_once "database.php";
             $ticket_id = substr($key, strlen('remove_'));
-            $sql = "SELECT ticket_id, price, winning_amount, winning_numbers FROM shopping_cart WHERE $ticket_id = ticket_id";
+            $sql = "SELECT ticket_id, price, winning_amount, winning_numbers, ticket_type FROM shopping_cart WHERE $ticket_id = ticket_id";
             $result = mysqli_query($conn_bool, $sql);
             $data = $result->fetch_all(MYSQLI_ASSOC);
             
@@ -59,16 +64,16 @@ if(!isset($_SESSION["user"])){
                 $price = $tick['price'];
                 $winning_amount = $tick['winning_amount'];
                 $winning_numbers = $tick['winning_numbers'];
-                
+                $ticket_type = $tick['ticket_type'];
             }
 
             require_once "database.php";
-            $sql = "INSERT INTO tickets (ticket_id, price, winning_amount, winning_numbers) VALUES (?,?,?,?)";
+            $sql = "INSERT INTO tickets (ticket_id, price, winning_amount, winning_numbers, ticket_type) VALUES (?,?,?,?,?)";
             $stmt = mysqli_stmt_init($conn_bool);
             $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
             # push ticket back into tickets table
             if($prepare_stmt){
-                mysqli_stmt_bind_param($stmt, "iiis", $ticket_id, $price, $winning_amount, $winning_numbers);
+                mysqli_stmt_bind_param($stmt, "iiiss", $ticket_id, $price, $winning_amount, $winning_numbers, $ticket_type);
                 mysqli_stmt_execute($stmt);
                 
 
@@ -95,7 +100,8 @@ if(!isset($_SESSION["user"])){
             $user_id = $_SESSION['user_id'];
 
             require_once "database.php";
-            $sql = "SELECT ticket_id, price, winning_amount FROM shopping_cart WHERE $user_id = id";
+            $sql = "SELECT ticket_id, price, winning_amount, ticket_type FROM shopping_cart WHERE $user_id = id";
+           
             $result = mysqli_query($conn_bool, $sql);
             $data = $result->fetch_all(MYSQLI_ASSOC);     
             
@@ -112,7 +118,7 @@ if(!isset($_SESSION["user"])){
         <?php
         $user_id = $_SESSION['user_id'];
         require_once "database.php";
-        $sql = "SELECT ticket_id, price, winning_amount FROM shopping_cart WHERE $user_id = id";
+        $sql = "SELECT ticket_id, price, winning_amount, ticket_type FROM shopping_cart WHERE $user_id = id";
         $result = mysqli_query($conn_bool, $sql);
         $data = $result->fetch_all(MYSQLI_ASSOC);     
         $total_cost = 0;
@@ -121,6 +127,7 @@ if(!isset($_SESSION["user"])){
             <thead class="thead-dark">
                 <tr>
                     <th scope='col'>Ticket Number</th>
+                    <th scope='col'>Ticket Type</th>
                     <th scope='col'>Price</th>
                     <th scope='col'>Winning Amount</th>
                     <th scope='col'></th>
@@ -134,9 +141,11 @@ if(!isset($_SESSION["user"])){
                             <td><?= htmlspecialchars($tick['ticket_id'])?></td>
                         </div>
                         <div class="form-group">
+                            <td><?= htmlspecialchars($tick['ticket_type'])?></td>
+                        </div>
+                        <div class="form-group">
                             <td><?= '$' . htmlspecialchars($tick['price'])?></td>
                             <?php $total_cost = $total_cost + $tick['price'];?>
-
                         </div>
                         <div class="form-group">
                             <td><?= '$' . htmlspecialchars($tick['winning_amount'])?></td>
