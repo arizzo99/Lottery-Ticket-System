@@ -99,6 +99,6 @@ $dateTime = strtotime('+0.0001 minutes');
         <h8>
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-2">
-        <a href="#.php" class="navbar-dark fs-2">PLAY NOW! </a>
+        <a href="browse.php"" class="navbar-dark fs-2">PLAY NOW! </a>
 </body>
 </html> 
