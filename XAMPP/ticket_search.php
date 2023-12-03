@@ -36,6 +36,14 @@ if(!isset($_SESSION["user"])){
                     <a href="history.php" class="nav-link">History </a>
                 </li>
                 <li class="nav-item">
+                    <a href="checkout.php" class="nav-link">Checkout </a>
+                </li>
+                <?php if(isset($_SESSION['admin'])):?>
+                <li class="nav-item">
+                    <a href="admin.php" class="nav-link">Status Report</a>
+                </li>
+                <?php endif ?>
+                <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
                 </li>
@@ -49,7 +57,7 @@ if(!isset($_SESSION["user"])){
             # implement error throwing for invalid inputs
             $search_term = $_POST['search'];
             require_once "database.php";
-            $sql = "SELECT * FROM tickets WHERE CAST(ticket_id AS CHAR) LIKE '%$search_term%'";
+            $sql = "SELECT * FROM tickets WHERE CAST(ticket_id AS CHAR) LIKE '%$search_term%' AND id IS NULL" ;
             $result = mysqli_query($conn_bool, $sql);
             $data = $result->fetch_all(MYSQLI_ASSOC);
         }
@@ -61,6 +69,7 @@ if(!isset($_SESSION["user"])){
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Ticket Number</th>
+                        <th scope="col">Ticket Type</th>
                         <th scope="col">Price</th>
                         <th scope="col">Winning Amount</th>
                     </tr>
@@ -72,6 +81,10 @@ if(!isset($_SESSION["user"])){
                         <div class="form-group">
                             <td><?= htmlspecialchars($row['ticket_id'])?></td>
                             <input type="hidden" name="ticket_id" value=<?= htmlspecialchars($row['ticket_id'])?>>
+                        </div>
+                        <div class="form-group">
+                            <td><?= htmlspecialchars($row['ticket_type'])?></td>
+                            <input type="hidden" name="ticket_type" value=<?= htmlspecialchars($row['ticket_type'])?>>
                         </div>
                         <div class="form-group">
                             <td><?= '$' . htmlspecialchars($row['price'])?></td>
