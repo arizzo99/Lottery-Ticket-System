@@ -24,20 +24,26 @@ if(!isset($_SESSION["user"])){
                     <a href="index.php" class="nav-link">Home </a>
                 </li>
                 <li class="nav-item">
-                    <a href="browse.php" class="nav-link">Browse <span class="sr-only">(current)</span></a>
+                    <a href="browse.php" class="nav-link">Browse</a>
                 </li>
                 <li class="nav-item">
                     <a href="ticket_search.php" class="nav-link">Ticket Search </a>
                 </li>
                 <li class="nav-item">
-                    <a href="profile.php" class="nav-link">My Profile </a>
+                    <a href="profile.php" class="nav-link">My Profile  <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a href="history.php" class="nav-link">History </a>
                 </li>
+                <?php if(isset($_SESSION['admin'])):?>
+                <li class="nav-item">
+                    <a href="admin.php" class="nav-link">Status Report</a>
+                </li>
+                <?php endif ?>
                 <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
+                
                 </li>
             </ul>
         </div>
@@ -52,34 +58,31 @@ if(!isset($_SESSION["user"])){
             $result = mysqli_query($conn_bool, $sql);
             $data = $result->fetch_all(MYSQLI_ASSOC);
         }
-             ?><div class="form-group">
+        ?>
+        <div class="form-group">
           
 
-            <table class="table table-striped table-dark table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
-                        <th scope="col"> Address</th>
-                          <th scope="col">Phone Number</th>
-                        <th scope="col">Email</th>
-                     </tr>
-                </thead>
-                
-                <?php foreach($data as $row): ?>
-                <tbody>
+        <table class="table table-striped table-dark table-hover">
+            <thead class="thead-dark">
                 <tr>
-                       
-                        <div class="form-group">
-                            <td><?=  htmlspecialchars($row['first_name'])?></td>
-                            <
-                            </div>
-                        <div class="form-group">
-                            <td><?=  htmlspecialchars($row['last_name'])?></td>
-                            
-                        </div>
-                        <div class="form-group">
-                            <td><?=  htmlspecialchars($row['address'])?></td>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col"> Address</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Email</th>
+                </tr>
+            </thead>
+            <?php foreach($data as $row): ?>
+            <tbody>
+                <tr>
+                    <div class="form-group">
+                        <td><?=  htmlspecialchars($row['first_name'])?></td>    
+                    </div>
+                    <div class="form-group">
+                        <td><?=  htmlspecialchars($row['last_name'])?></td>     
+                    </div>
+                    <div class="form-group">
+                        <td><?=  htmlspecialchars($row['address'])?></td>
                             
                             <div class="form-group">
                             <td><?= htmlspecialchars($row['phone_number'])?></td>
