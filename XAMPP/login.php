@@ -31,6 +31,9 @@ if(isset($_SESSION["user"])){
                     session_start();
                     $_SESSION["user"] = "yes";
                     $_SESSION["user_id"] = $user['id'];
+                    if(isset($user['isAdmin'])){
+                        $_SESSION["admin"] = "yes";
+                    }
                     header("Location: index.php");
                     die();
                 }
