@@ -41,14 +41,6 @@ $dateTime = strtotime('+0.0001 minutes');
                     <a href="history.php" class="nav-link">History </a>
                 </li>
                 <li class="nav-item">
-                    <a href="checkout.php" class="nav-link">Checkout </a>
-                </li>
-                <?php if(isset($_SESSION['admin'])):?>
-                <li class="nav-item">
-                    <a href="admin.php" class="nav-link">Status Report</a>
-                </li>
-                <?php endif ?>
-                <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
                 
@@ -79,7 +71,7 @@ $dateTime = strtotime('+0.0001 minutes');
             var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-            document.getElementById("counter").innerHTML =
+            document.getElementById("counter").innerHTML =   
             minutes + " m " + seconds + " s ";
             // Display Expired, if the count down is over
             if (diff < 0) {
@@ -87,6 +79,26 @@ $dateTime = strtotime('+0.0001 minutes');
                 document.getElementById("counter").innerHTML = "EXPIRED";
             }
         }, 1000);
+        
 </script>
+<h5> 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-1">
+        <a href="#.php" class="navbar-brand fs-1">Welcome to our Lottery Purchase System</a>
+       
+        </nav>
+       <h6> 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-3">
+        <a href="#.php" class="navbar-brand fs-3">Drawings are once a week, we offer PowerBall, Mega Millions, Texas Lotto, and Texas Two Step!</a>
+       
+        </nav>
+        <h7> 
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-4">
+        <a href="#.php" class="navbar-brand fs-4">Many chances to win, along with different claiming options! </a>
+       
+        </nav>
+        <h8>
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-2">
+        <a href="#.php" class="navbar-dark fs-2">PLAY NOW! </a>
 </body>
 </html> 
