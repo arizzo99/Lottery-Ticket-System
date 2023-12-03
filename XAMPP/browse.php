@@ -10,7 +10,11 @@ if(!isset($_SESSION["user"])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Tickets</title>
+    <?php if(isset($_SESSION['admin'])): ?>
+        <title>Browse Tickets (Admin View)</title>
+    <?php else: ?>
+        <title>Browse Tickets</title>
+    <?php endif ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -75,6 +79,13 @@ if(!isset($_SESSION["user"])){
                 }
             }
 
+            $sql = "SELECT * FROM shopping_cart WHERE $user_id = id";
+            $result = mysqli_query($conn_bool, $sql);
+            $alike_row_count = mysqli_num_rows($result);
+
+            if($alike_row_count > 9){
+                array_push($errors, "You already have 10 tickets in your cart. Please check out or remove tickets in cart to add more.");
+            }
             if(count($errors) > 0){
                 foreach($errors as $error){
                     echo "<div class='alert alert-danger'>$error</div>";
@@ -200,6 +211,35 @@ if(!isset($_SESSION["user"])){
     elseif(isset($_POST['add_selections'])){
         echo "<div class='alert alert-info'>Ticket Added</div>";
         unset($_SESSION['is_adding']);
+        $price = $_POST['price1'];
+        $prize = $_POST['prize1'];
+        $num1 = $_POST['num1'];
+        $num2 = $_POST['num2'];
+        $num3 = $_POST['num3'];
+        $num4 = $_POST['num4'];
+        $num5 = $_POST['num5'];
+        $user_numbers = '';
+        $user_numbers = $user_numbers.$num1;
+        $user_numbers = $user_numbers.'-'.$num2;
+        $user_numbers = $user_numbers.'-'.$num3;
+        $user_numbers = $user_numbers.'-'.$num4;
+        $user_numbers = $user_numbers.'-'.$num5;
+
+        require_once "database.php";
+        $sql = "INSERT INTO tickets (price, winning_amount, winning_numbers) VALUES (?,?,?)";
+        $stmt = mysqli_stmt_init($conn_bool);
+        $prepare_stmt = mysqli_stmt_prepare($stmt, $sql);
+
+        if($prepare_stmt){
+            mysqli_stmt_bind_param($stmt, "iii", $price, $prize, $user_numbers);
+            mysqli_stmt_execute($stmt);
+        }
+        else{
+            die("Something went wrong with ticket insertion.");
+        }
+
+
+
     }
     
     foreach($_POST as $key => $value){
@@ -224,8 +264,6 @@ if(!isset($_SESSION["user"])){
             else{
                 unset($_SESSION['selected_tickets'][$index]);
             }
-            
-
         }
     }
     
@@ -314,10 +352,10 @@ if(!isset($_SESSION["user"])){
         <?php if(isset($_SESSION['is_adding'])): ?>
             <div class="container">
                 <div class="form-group">
-                    <input type="text" class="form-control" name="price" placeholder="Enter Price Here">
+                    <input type="number" min="1" class="form-control" name="price1" placeholder="Enter Price Here">
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" name="price" placeholder="Enter Prize Money Here">
+                    <input type="number" min="1" class="form-control" name="prize1" placeholder="Enter Prize Money Here">
                 </div>
                 <div class="form-group">
                     <input type="number" min="1" max="50" class="form-control" name="num1" placeholder="Winning Number 1">
