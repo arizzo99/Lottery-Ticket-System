@@ -1,12 +1,26 @@
 <?php
 session_start();
+
 if(!isset($_SESSION["user"])){
     header("Location: login.php");
 }
-$dateTime = strtotime('+0.0001 minutes');
- $getDateTime = date("F d, Y H:i:s",$dateTime);
-?>
 
+$secondsInADay = 24 * 60 * 60;
+$initialCountdown = 7 * $secondsInADay;
+
+if (!isset($_SESSION['countdown'])) {
+    $_SESSION['countdown'] = $initialCountdown;
+    $_SESSION['drawing'] = 'yes';
+} else {
+    $_SESSION['countdown'] -= 1;
+}
+
+$countdownInSeconds = $_SESSION['countdown'];
+$days = floor($countdownInSeconds / $secondsInADay);
+$hours = floor(($countdownInSeconds % $secondsInADay) / 3600);
+$minutes = floor(($countdownInSeconds % 3600) / 60);
+$seconds = $countdownInSeconds % 60;
+?>
 
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -14,12 +28,11 @@ $dateTime = strtotime('+0.0001 minutes');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
-
     <h1>Texas Lottery Tickets</h1>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-4">
         <a href="#.php" class="navbar-brand fs-4">TLPS</a>
@@ -41,6 +54,14 @@ $dateTime = strtotime('+0.0001 minutes');
                     <a href="history.php" class="nav-link">History </a>
                 </li>
                 <li class="nav-item">
+                    <a href="checkout.php" class="nav-link">Checkout </a>
+                </li>
+                <?php if(isset($_SESSION['admin'])):?>
+                <li class="nav-item">
+                    <a href="admin.php" class="nav-link">Status Report</a>
+                </li>
+                <?php endif ?>
+                <li class="nav-item">
                     <a href="logout.php" class="nav-link">Logout</a>
                 </li>
                 
@@ -50,55 +71,55 @@ $dateTime = strtotime('+0.0001 minutes');
         </div>
     </nav>
 
-
-    <h4>Next ticket drawing in:
-
-        <div class="row">
-            <div class="col-md-12 mt-40">  
-		<h2 id="counter" class="text-center"></h2>
-            </div>
-        </div>
+    <div class="text-center fs-4">
+        <h4>Next ticket drawing in: </h4>
+    </div>
+    
+    <div id="counter" class="text-center fs-4">
+        <h4>
+            <?php echo "$days d $hours h $minutes m $seconds s"; ?>
+        </h4>
     </div>
 
-<script>
-        var countDownTimer = new Date("<?php echo "$getDateTime"; ?>").getTime();
-        // Update the count down every 1 second
-        var interval = setInterval(function() {
-            var current = new Date().getTime();
-            // Find the difference between current and the count down date
-            var diff = countDownTimer - current;
-           
-            var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    <script>
+        // Function to update the countdown
+        function updateCountdown() {
+            $.ajax({
+                url: 'update_countdown.php', // Create a new PHP file to handle updates
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Display the updated countdown
+                    document.getElementById("counter").innerHTML = response.countdown;
+                }
+            });
+        }
 
-            document.getElementById("counter").innerHTML =   
-            minutes + " m " + seconds + " s ";
-            // Display Expired, if the count down is over
-            if (diff < 0) {
-                clearInterval(interval);
-                document.getElementById("counter").innerHTML = "EXPIRED";
-            }
-        }, 1000);
+        // Update the countdown initially
+        updateCountdown();
+
+        // Set interval to update the countdown every 1 second
+        setInterval(updateCountdown, 1000);
+    </script>
+    <h5> 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-1">
+            <a href="#.php" class="navbar-brand fs-1">Welcome to our Lottery Purchase System</a>
         
-</script>
-<h5> 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-1">
-        <a href="#.php" class="navbar-brand fs-1">Welcome to our Lottery Purchase System</a>
-       
-        </nav>
-       <h6> 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-3">
-        <a href="#.php" class="navbar-brand fs-3">Drawings are once a week, we offer PowerBall, Mega Millions, Texas Lotto, and Texas Two Step!</a>
-       
-        </nav>
-        <h7> 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-4">
-        <a href="#.php" class="navbar-brand fs-4">Many chances to win, along with different claiming options! </a>
-       
-        </nav>
-        <h8>
+            </nav>
+        <h6> 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-3">
+            <a href="#.php" class="navbar-brand fs-3">Drawings are once a week, we offer PowerBall, Mega Millions, Texas Lotto, and Texas Two Step!</a>
+        
+            </nav>
+            <h7> 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-4">
+            <a href="#.php" class="navbar-brand fs-4">Many chances to win, along with different claiming options! </a>
+        
+            </nav>
+            <h8>
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-2">
-        <a href="browse.php"" class="navbar-dark fs-2">PLAY NOW! </a>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark fs-2">
+            <a href="browse.php"" class="navbar-dark fs-2">PLAY NOW! </a>
+
 </body>
-</html> 
+</html>
